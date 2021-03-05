@@ -13,11 +13,13 @@
 #import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
 
-#include "lib/imgui/imgui.h"
-#include "lib/imgui/mac/imgui_impl_metal.h"
-#include "lib/imgui/mac/imgui_impl_osx.h"
+#include <res/fonts/default_font.h>
 
-#include "res/fonts/default_font.h"
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <lib/imgui/imgui.h>
+#include <lib/imgui/backends/imgui_impl_metal.h>
+#include <lib/imgui/backends/imgui_impl_osx.h>
+
 #include "src/gui.h"
 
 static s_gui gui;
@@ -53,22 +55,15 @@ static s_gui gui;
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
-
     
-    ImFontConfig font_config;
-    font_config.OversampleH = 4;
-    font_config.OversampleV = 4;
-    
-    io.FontDefault = io.Fonts->AddFontFromMemoryCompressedBase85TTF(default_font_compressed_data_base85,
-       18, &font_config, io.Fonts->GetGlyphRangesCyrillic());
+    // Must be before metal init
+    // Because it initializes fonts and crashes if it is
+    // initilized after metal
+    gui_init(&gui, (s_gui_init) {});
     
     // Setup Renderer backend
     ImGui_ImplMetal_Init(_device);
-
+    
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
@@ -83,8 +78,6 @@ static s_gui gui;
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
-    
-    gui_init(&gui, (s_gui_init) {});
     
     return self;
 }

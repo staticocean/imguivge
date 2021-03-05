@@ -8,80 +8,9 @@
 #include <lib/imgui/imgui.h>
 #include <lib/imgui/imgui_internal.h>
 
-//#include <lib/imfilebrowser/imfilebrowser.h>
-
-#include <softael_lib/vl.h>
-#include <softael_lib/vl3d.h>
-#include <softael_lib/imgui_w.h>
-
-//------------------------------------------------------------------------------
-
-//inline ImGui::FileBrowser __file_browser_open__ = ImGui::FileBrowser();
-//inline ImGui::FileBrowser __file_browser_save__ = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename);
-//
-//inline void gui_fileopen(char *file_path, float width = -1)
-//{
-//    ImGui::PushID(file_path);
-//    
-//    if (width < 0) width = ImGui::GetContentRegionAvailWidth();
-//    
-//    ImGui::SetNextItemWidth(width-40);
-//    char *file_name = file_path + strlen(file_path);
-//    while (file_name > file_path && *(file_name-1) != '\\' && *(file_name-1) != '/')
-//    { --file_name; }
-//    
-//    ImGui::InputText("##file_path", file_name, 512, ImGuiInputTextFlags_ReadOnly);
-//    if (ImGui::IsItemHovered())
-//    { ImGui::SetTooltip(file_path); }
-//
-//    ImGui::SameLine(0.0, 0.0);
-//    
-//    if(ImGui::Button("SEL", ImVec2(40,0)))
-//    { __file_browser_open__.Open(); }
-//    
-//    __file_browser_open__.Display();
-//    
-//    if(__file_browser_open__.HasSelected())
-//    {
-//        strcpy(file_path, __file_browser_open__.GetSelected().string().c_str());
-//        __file_browser_open__.ClearSelected();
-//    }
-//    
-//    ImGui::PopID();
-//    
-//    return;
-//}
-//
-//inline void gui_filesave(char *file_path)
-//{
-//    ImGui::PushID(file_path);
-//    
-//    ImGui::SetNextItemWidth(-40);
-//    char *file_name = file_path + strlen(file_path);
-//    while (file_name > file_path && *(file_name-1) != '\\' && *(file_name-1) != '/')
-//    { --file_name; }
-//    
-//    ImGui::InputText("##file_path", file_name, 512, ImGuiInputTextFlags_ReadOnly);
-//    if (ImGui::IsItemHovered())
-//    { ImGui::SetTooltip(file_path); }
-//    
-//    ImGui::SameLine(0.0, 0.0);
-//    
-//    if(ImGui::Button("SEL", ImVec2(ImGui::GetContentRegionAvailWidth(),0)))
-//    { __file_browser_save__.Open(); }
-//    
-//    __file_browser_save__.Display();
-//    
-//    if(__file_browser_save__.HasSelected())
-//    {
-//        strcpy(file_path, __file_browser_save__.GetSelected().string().c_str());
-//        __file_browser_save__.ClearSelected();
-//    }
-//    
-//    ImGui::PopID();
-//    
-//    return;
-//}
+#include <lib_internal/vl.h>
+#include <lib_internal/vl3d.h>
+#include <lib_internal/imgui_w.h>
 
 //------------------------------------------------------------------------------
 

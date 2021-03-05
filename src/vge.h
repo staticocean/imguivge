@@ -17,10 +17,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <softael_lib/vl.h>
-#include <softael_lib/ga.h>
-#include <softael_lib/task.h>
-#include <softael_lib/sda.h>
+#include <lib_internal/vl.h>
+#include <lib_internal/task.h>
+#include <lib_internal/sda.h>
 
 //------------------------------------------------------------------------------
 

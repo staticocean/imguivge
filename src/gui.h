@@ -11,8 +11,9 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <lib/imgui/imgui.h>
 
-#include <softael_lib/vl.h>
-#include <softael_lib/softael.h>
+#include <lib_internal/vl.h>
+#include <lib_internal/softael.h>
+#include <lib_internal/imgui_theme.h>
 
 #include "gui_w.h"
 #include "gui_menu.h"
@@ -43,10 +44,18 @@ inline uint8_t gui_init(s_gui *self, s_gui_init attr)
 	self->w_height = 720;
 	self->w_width  = 1024;
 	
-	ImGui::StyleColorsDark();
-	ImGui::StyleColorsLight();
-	
-	ImGuiStyle& style_ref = ImGui::GetStyle();
+    imgui_theme_set();
+    
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    
+    ImFontConfig font_config;
+    font_config.OversampleH = 4;
+    font_config.OversampleV = 4;
+    
+    io.FontDefault = io.Fonts->AddFontFromMemoryCompressedBase85TTF(default_font_compressed_data_base85,
+       18, &font_config, io.Fonts->GetGlyphRangesCyrillic());
+    
+    ImGuiStyle& style_ref = ImGui::GetStyle();
 	
 	style_ref.ScrollbarRounding = 0.0;
 	style_ref.ChildRounding     = 0.0;
