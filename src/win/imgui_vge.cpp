@@ -5,12 +5,11 @@
 #include <stdio.h>
 #include <time.h>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <lib/imgui/imgui.h>
-#include <lib/imgui/win/imgui_impl_glfw.h>
-#include <lib/imgui/win/imgui_impl_opengl3.h>
-#include <lib/opengl/gl3w.h>
-#include <lib/opengl/glfw3.h>
+#include <lib/imgui/backends/imgui_impl_glfw.h>
+#include <lib/imgui/backends/imgui_impl_opengl3.h>
+#include <lib/imgui/backends/gl3w/GL/gl3w.h>
+#include <lib/imgui/backends/glfw/include/GLFW/glfw3.h>
 
 #include <lib/implot/implot.h>
 
@@ -45,7 +44,7 @@ int main(int, char**)
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "IMGUI Vector Graphics Editor", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);

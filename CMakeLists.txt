@@ -1,27 +1,25 @@
 cmake_minimum_required(VERSION 3.16)
-project(lb_manager)
+project(imgui_vge)
 
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wundefined-internal")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -static-libstdc++ -static-libgcc")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format-security")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-int-to-void-pointer-cast")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 
-include_directories(./)
-include_directories(softael_lib/)
-include_directories(lib/imgui/)
-include_directories(lib/opengl/)
-include_directories(lib/implot/)
-include_directories(lib/hidapi/)
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+add_compile_definitions(IMGUI_DEFINE_MATH_OPERATORS)
 
-file(GLOB src_main      "src/*.*" "src/win/*.*")
-file(GLOB src_imgui     "lib/imgui/*.*" "lib/imgui/win/*.*")
-#file(GLOB src_libhid    "lib/libhid/win32/*.cc")
-#file(GLOB src_hidapi    "lib/hidapi/windows/*.*")
-file(GLOB src_opengl    "lib/opengl/*.*")
-#file(GLOB src_tinymat   "lib/tinymat/*.*")
-file(GLOB src_implot    "lib/implot/*.*")
+include_directories(.)
+include_directories(./src)
 
-add_executable(lb_manager ${src_main} ${src_imgui} ${src_opengl} ${src_tinymat} ${src_implot} ${src_hidapi})
+file(GLOB src_main
+        ./src/*
+        ./src/win/*
+        )
 
-target_link_libraries(lb_manager LINK_PUBLIC opengl32)
-target_link_libraries(lb_manager LINK_PUBLIC ../lib/opengl/static/glfw3_x64)
-target_link_libraries(lb_manager LINK_PUBLIC ../lib/hidapi/windows/hidapi_x64/hidapi)
+add_executable(imgui_vge ${src_main})
+
+add_subdirectory(lib_gui)
+target_link_libraries(imgui_vge LINK_PUBLIC lib_gui)
 

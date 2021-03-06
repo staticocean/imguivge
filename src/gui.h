@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <lib/imgui/imgui.h>
 
 #include <lib_internal/vl.h>
@@ -16,8 +15,8 @@
 #include <lib_internal/imgui_theme.h>
 
 #include "gui_w.h"
-#include "gui_menu.h"
 #include "gui_tbar.h"
+#include "gui_vge.h"
 
 //------------------------------------------------------------------------------
 
@@ -26,8 +25,9 @@ typedef struct gui
 	float32_t   w_height;
 	float32_t   w_width;
 	
-	s_gui_menu  gui_menu;
 	s_gui_tbar  gui_tbar;
+	
+	s_vge 		vge;
 	
 } 	s_gui;
 
@@ -39,10 +39,9 @@ typedef struct gui_init
 
 //------------------------------------------------------------------------------
 
-inline uint8_t gui_init(s_gui *self, s_gui_init attr)
+inline uint8_t gui_init(s_gui *gui, s_gui_init attr)
 {
-	self->w_height = 720;
-	self->w_width  = 1024;
+	NFD_Init();
 	
     imgui_theme_set();
     
@@ -67,21 +66,25 @@ inline uint8_t gui_init(s_gui *self, s_gui_init attr)
 	
 	style_ref.ChildBorderSize   = 0.0;
 	style_ref.FrameBorderSize   = 0.0;
-	style_ref.PopupBorderSize   = 1.0;
+	style_ref.PopupBorderSize   = 0.0;
 	style_ref.TabBorderSize     = 0.0;
-	style_ref.WindowBorderSize  = 1.0;
+	style_ref.WindowBorderSize  = 0.0;
+	
+	gui->w_height = 720;
+	gui->w_width  = 1024;
+	
+	gui->gui_tbar.height = 40;
  
-	self->gui_tbar.height = 0;
-	self->gui_menu.height = 0;
-    
+	vge_init(&gui->vge, (s_vge_attr) {});
+	
 	return 0x00;
 }
 
 //------------------------------------------------------------------------------
 
-inline uint8_t gui_main(s_gui *self)
+inline uint8_t gui_main(s_gui *gui)
 {
-    const int pwidth = 250;
+    const int pwidth = 300;
     
 //	static s_dev *sel = NULL;
 	
@@ -94,67 +97,48 @@ inline uint8_t gui_main(s_gui *self)
 		if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
 	#endif
 	
-    // Disable imgui menu for macOS compat.
-    // because OSX has its own menu above
-    
-//	gui_menu_main(&self->gui_menu);
-	
-//	{
-//		// Toolbar
-//		ImGui::SetNextWindowPos((ImVec2) { 0, (float) self->gui_menu.height }, ImGuiCond_Always);
-//		ImGui::SetNextWindowSize((ImVec2) { self->w_width, (float) self->gui_tbar.height }, ImGuiCond_Always);
-//		ImGui::Begin("toolbar", NULL, static_flags | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration);
-//		gui_tbar_main(&self->gui_tbar);
-//		ImGui::End();
-//	}
-	
 	{
-		// progress popup
-		// must be after toolbar
-//		gui_eng_updategui(&self->gui_eng, &self->eng);
-	}
-	
-	{
-		// Object list
-		ImGui::SetNextWindowPos((ImVec2) {0, (float) self->gui_menu.height + (float) self->gui_tbar.height }, ImGuiCond_Always);
-		ImGui::SetNextWindowSize((ImVec2) {pwidth, self->w_height - self->gui_menu.height - self->gui_tbar.height }, ImGuiCond_Always);
-		ImGui::Begin("lpanel", NULL, static_flags);
-//		gui_eng_objlist(&self->gui_eng, &self->eng);
-
-//		sel = (s_dev*) gui_load_void("devm_sel");
-		
+		// Toolbar
+		ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(gui->w_width, (float) gui->gui_tbar.height), ImGuiCond_Always);
+		ImGui::Begin("toolbar", NULL, static_flags
+			| ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
+		gui_tbar_main(&gui->gui_tbar);
 		ImGui::End();
 	}
 	
 	{
-		// Object edit
-		ImGui::SetNextWindowPos((ImVec2) {pwidth, (float) self->gui_menu.height + (float) self->gui_tbar.height }, ImGuiCond_Always);
-		ImGui::SetNextWindowSize((ImVec2) {self->w_width - pwidth*2, self->w_height - self->gui_menu.height - self->gui_tbar.height }, ImGuiCond_Always);
-		ImGui::Begin("mpanel", NULL, static_flags);
-//
-//		if (sel != NULL && sel->state != 0x00)
-//		{ sel->gui_edit(sel); }
+		// Left panel
+		ImGui::SetNextWindowPos(ImVec2(0, (float) gui->gui_tbar.height), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(pwidth, gui->w_height - gui->gui_tbar.height), ImGuiCond_Always);
+		ImGui::Begin("lpanel", NULL, static_flags);
+		
+		gui_vge_objlist(&gui->vge);
 		
 		ImGui::End();
 	}
 	
 	{
 		// Main view
-		ImGui::SetNextWindowPos ((ImVec2) {self->w_width - pwidth, (float) self->gui_menu.height + (float) self->gui_tbar.height }, ImGuiCond_Always);
-		ImGui::SetNextWindowSize((ImVec2) {pwidth, self->w_height - self->gui_menu.height - self->gui_tbar.height }, ImGuiCond_Always);
+		ImGui::SetNextWindowPos(ImVec2(pwidth, (float) gui->gui_tbar.height), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(gui->w_width - pwidth*2, gui->w_height - gui->gui_tbar.height), ImGuiCond_Always);
+		ImGui::Begin("mpanel", NULL, static_flags);
+//
+//		if (sel != NULL && sel->state != 0x00)
+//		{ sel->gui_edit(sel); }
+		
+		gui_vge_canvas(&gui->vge);
+
+		ImGui::End();
+	}
+	
+	{
+		// Right panel
+		ImGui::SetNextWindowPos (ImVec2(gui->w_width - pwidth, (float) gui->gui_tbar.height), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(pwidth, gui->w_height - gui->gui_tbar.height), ImGuiCond_Always);
 		ImGui::Begin("rpanel", NULL, static_flags);
 		
-//		if (sel != NULL && sel->state != 0x00)
-//		{ sel->gui_view(sel); }
-		
-//		ImVec2 c = ImGui::GetCursorPos();
-//		ImGui::SetCursorPos(ImGui::GetContentRegionMax() - ImVec2(48, 120));
-//////		.bg   = IM_COL32(224, 0, 0, 128),
-//		gui_softael_ldraw(
-//				IM_COL32(0, 0, 0, 255-90),
-//				IM_COL32_WHITE, 48);
-//		
-//		ImGui::SetCursorPos(c);
+		gui_vge_varlist(&gui->vge);
 		
 		ImGui::End();
 	}
