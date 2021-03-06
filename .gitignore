@@ -74,3 +74,27 @@ DerivedData/
 
 ## Gcc Patch
 /*.gcno
+
+
+*.exe
+*.obj
+*.rsp
+*.pdb
+*.cbp
+*.*cache
+*.wasm
+*.wasm.*
+*.data
+*.bin
+*.cmake
+*.log
+*.ini
+*.trj
+*.internal
+*.zip
+*.mat
+*.ini
+.DS*
+.idea/
+cmake-build-*/
+
