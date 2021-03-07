@@ -323,10 +323,10 @@ inline void gui_vge_objsel(s_vge *vge, s_vl3d_obj *obj)
 		ImVec2 p1 = vl3d_view_tf(&vge->vl3d_view, obj->trngl.p1);
 		ImVec2 p2 = vl3d_view_tf(&vge->vl3d_view, obj->trngl.p2);
 		
-		if (p0.x > p1.x) { std::swap(p0, p1); }
+		ImVec2 p = ImVec2(min(p0.x,p1.x), min(p0.y,p1.y));
 		
 		if (__gui_vge_objctrl_ib__("##ctrl_box",
-								   p1-p0 + ImVec2(8,8), p0-ImVec2(4,4)))
+								   p1-p0 + ImVec2(8,8), p-ImVec2(4,4)))
 		{ vge_sel_obj(vge, obj); }
 	}
 	
@@ -337,10 +337,10 @@ inline void gui_vge_objsel(s_vge *vge, s_vl3d_obj *obj)
 		ImVec2 p2 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p2);
 		ImVec2 p3 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p3);
 		
-		if (p0.x > p1.x) { std::swap(p0, p1); }
+		ImVec2 p = ImVec2(min(p0.x,p1.x), min(p0.y,p1.y));
 		
 		if (__gui_vge_objctrl_ib__("##ctrl_box",
-								   p1-p0 + ImVec2(8,8), p0-ImVec2(4,4)))
+								   p1-p0 + ImVec2(8,8), p-ImVec2(4,4)))
 		{ vge_sel_obj(vge, obj); }
 	}
 	
@@ -349,7 +349,7 @@ inline void gui_vge_objsel(s_vge *vge, s_vl3d_obj *obj)
 		ImVec2 p0 = vl3d_view_tf(&vge->vl3d_view, obj->text.p0);
 		
 		if (__gui_vge_objctrl_ib__("##ctrl_box",
-								   p0 + ImVec2(8,8), p0-ImVec2(4,4)))
+								   ImVec2(8,8), p0-ImVec2(4,4)))
 		{ vge_sel_obj(vge, obj); }
 	}
 	
