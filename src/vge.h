@@ -22,9 +22,12 @@
 
 //------------------------------------------------------------------------------
 
-#define VGE_TYPE_NONE  0x00
-#define VGE_TYPE_COLOR 0x01
-#define VGE_TYPE_VALUE 0x02
+#define VGE_TYPE_NONE  	0x00
+#define VGE_TYPE_COLOR 	0x01
+#define VGE_TYPE_VALUE	0x02
+
+#define VGE_SEL_NONE	0x00
+#define VGE_SEL_OBJ  	0x01
 
 error_(vge_vof, "[vge] var list overflow");
 
@@ -75,13 +78,14 @@ typedef struct vge
 	s_vl3d_gridfline2d 	vl3d_gridline;
 	s_vl3d_xyz2d		vl3d_xyz;
 	
-	uint32_t    		obj_sz;
-	uint32_t    		*obj_of;
     s_vl3d_obj  		obj_ls[UINT16_MAX];
 	
 	uint32_t    		var_of;
 	uint32_t    		var_sz;
     s_vge_var   		var_ls[256];
+    
+    void 				*sel_item;
+    uint8_t 			sel_type;
     
 }   s_vge;
 
@@ -95,8 +99,8 @@ typedef struct vge_attr
 
 inline void vge_init(s_vge *vge, s_vge_attr attr)
 {
-	vge->obj_sz = sizeof(vge->obj_ls) / sizeof(s_vl3d_obj);
-	vge->obj_of = &vge->vl3d.obj_of;
+	vge->sel_item = NULL;
+	vge->sel_item = VGE_SEL_NONE;
 	
 	vge->var_sz = sizeof(vge->var_ls) / sizeof(s_vge_var);
 	vge->var_of = 0x00;
@@ -131,6 +135,85 @@ inline void vge_init(s_vge *vge, s_vge_attr attr)
 	vl3d_xyz2d(&vge->vl3d, &vge->vl3d_xyz);
 	
     return;
+}
+
+//------------------------------------------------------------------------------
+
+inline void vge_save(s_vge *vge, char *file_path)
+{
+	FILE *file_handle = fopen(file_path, "wb+");
+	fwrite(vge, 1, sizeof(s_vge), file_handle);
+	fclose(file_handle);
+	
+	return;
+}
+
+//------------------------------------------------------------------------------
+
+inline void vge_load(s_vge *vge, char *file_path)
+{
+	FILE *file_handle = fopen(file_path, "rb");
+	
+	if (file_handle != NULL)
+	{
+		fread(vge, 1, sizeof(s_vge), file_handle);
+		fclose(file_handle);
+		
+		// Fix pointers
+		vge->sel_item = NULL;
+		vge->sel_type = VGE_SEL_NONE;
+		vge->vl3d.obj_ls = vge->obj_ls;
+	}
+	
+	return;
+}
+
+//------------------------------------------------------------------------------
+
+inline void vge_render(s_vge *vge, char *file_path)
+{
+	FILE *file_handle = fopen(file_path, "w+");
+	
+	char *file_name = file_path + strlen(file_path);
+	while (file_name > file_path && *(file_name-1) != '\\' && *(file_name-1) != '/')
+	{ --file_name; }
+	
+	fprintf(file_handle, "#ifndef __%s__", file_name);
+	fprintf(file_handle, "#define __%s__", file_name);
+	
+	fprintf(file_handle, "typedef struct %s {", file_name);
+	fprintf(file_handle, "} s_%s;", file_name);
+	
+	fprintf(file_handle, "inline void %s_draw(s_%s %s) {", file_name, file_name, file_name);
+	fprintf(file_handle, "ImGuiWindow* window = ImGui::GetCurrentWindow();");
+	
+	fprintf(file_handle, "}");
+	
+	fprintf(file_handle, "#endif");
+	
+	fclose(file_handle);
+	
+	return;
+}
+
+//------------------------------------------------------------------------------
+
+inline void vge_sel_none(s_vge *vge)
+{
+	vge->sel_item = NULL;
+	vge->sel_type = VGE_SEL_NONE;
+	
+	return;
+}
+
+//------------------------------------------------------------------------------
+
+inline void vge_sel_obj(s_vge *vge, s_vl3d_obj *obj)
+{
+	vge->sel_item = obj;
+	vge->sel_type = VGE_SEL_OBJ;
+	
+	return;
 }
 
 //------------------------------------------------------------------------------
@@ -193,7 +276,7 @@ inline uint32_t vge_var_index(s_vge *vge, s_vge_var *var)
 
 inline error_t vge_var_rem(s_vge *vge, s_vge_var *var)
 {
-	// TO-DO add vel (var empty list) error
+	// TODO add vel (var empty list) error
 	if (vge->var_of < 0x01) { return error_none; }
 	
 	uint32_t index = vge_var_index(vge, var);

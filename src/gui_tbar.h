@@ -13,12 +13,15 @@
 #include <lib/clip/clip.h>
 #include <lib/nfde/nfd.h>
 
+#include "vge.h"
+
 //----------------------------------------------------------------
 
 typedef struct gui_tbar
 {
 	int height;
 	
+	s_vge 	*vge;
 	char file_path[512];
 	
 } 	s_gui_tbar;
@@ -30,46 +33,34 @@ inline void gui_tbar_menu_file(s_gui_tbar *tbar)
 	if (ImGui::MenuItem("Open", "Ctrl+O"))
 	{
 		nfdchar_t *user_path;
-		nfdfilteritem_t filterItem[1] = { { "Trajectory Project", "trj" } };
+		nfdfilteritem_t filterItem[1] = { { "IMGUI VGE Project", "ivge" } };
 		nfdresult_t result = NFD_OpenDialog(&user_path, filterItem, 1, tbar->file_path);
 		
 		if (result == NFD_OKAY)
 		{
 			strcpy(tbar->file_path, user_path);
-//			trj_eng_load(tbar->eng, tbar->file_path);
+			vge_load(tbar->vge, tbar->file_path);
 			
 			NFD_FreePath(user_path);
 		}
-		
-//		else if (result == NFD_CANCEL)
-//		{ puts("User pressed cancel."); }
-
-//		else
-//		{ printf("Error: %s\n", NFD_GetError() ); }
 	}
 
-//	if (ImGui::MenuItem("Save", "Ctrl+S"))
-//	{ trj_eng_save(tbar->eng, tbar->file_path); }
-
+	if (ImGui::MenuItem("Save", "Ctrl+S"))
+	{ vge_save(tbar->vge, tbar->file_path); }
+	
 	if (ImGui::MenuItem("Save As...", ""))
 	{
 		nfdchar_t *user_path;
-		nfdfilteritem_t filterItem[1] = { { "Trajectory Project", "trj" } };
-		nfdresult_t result = NFD_SaveDialog(&user_path, filterItem, 1, tbar->file_path, "project.trj");
+		nfdfilteritem_t filterItem[1] = { { "IMGUI VGE Project", "ivge" } };
+		nfdresult_t result = NFD_SaveDialog(&user_path, filterItem, 1, tbar->file_path, "vge_image.ivge");
 		
 		if (result == NFD_OKAY)
 		{
 			strcpy(tbar->file_path, user_path);
-//			trj_eng_save(tbar->eng, tbar->file_path);
+			vge_save(tbar->vge, tbar->file_path);
 			
 			NFD_FreePath(user_path);
 		}
-
-//		else if (result == NFD_CANCEL)
-//		{ puts("User pressed cancel."); }
-
-//		else
-//		{ printf("Error: %s\n", NFD_GetError() ); }
 	}
 	
 	ImGui::EndMenu();
@@ -144,7 +135,7 @@ inline uint8_t gui_tbar_main(s_gui_tbar *tbar)
 		char file_preview[256];
 		sprintf(file_preview, " FILE: %s", file_name);
 		
-		ImGui::SetNextItemWidth(160);
+		ImGui::SetNextItemWidth(240);
 		ImGui::InputText("##file_path", file_preview, 256, ImGuiInputTextFlags_ReadOnly);
 		gui_hint(tbar->file_path);
 	}

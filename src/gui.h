@@ -73,9 +73,13 @@ inline uint8_t gui_init(s_gui *gui, s_gui_init attr)
 	gui->w_height = 720;
 	gui->w_width  = 1024;
 	
+	gui->gui_tbar.vge = &gui->vge;
 	gui->gui_tbar.height = 40;
  
 	vge_init(&gui->vge, (s_vge_attr) {});
+	
+	sprintf(gui->gui_tbar.file_path, "./default.ivge");
+	vge_load(gui->gui_tbar.vge, gui->gui_tbar.file_path);
 	
 	return 0x00;
 }
@@ -84,6 +88,13 @@ inline uint8_t gui_init(s_gui *gui, s_gui_init attr)
 
 inline uint8_t gui_main(s_gui *gui)
 {
+	ImGuiIO& io = ImGui::GetIO();
+	
+	if (io.KeyCtrl && ImGui::IsKeyPressed('S', false))
+	{
+		vge_save(&gui->vge, gui->gui_tbar.file_path);
+	}
+	
     const int pwidth = 300;
     
 //	static s_dev *sel = NULL;

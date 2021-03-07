@@ -98,3 +98,4 @@ DerivedData/
 .idea/
 cmake-build-*/
 
+*.ivge
