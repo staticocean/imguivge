@@ -170,26 +170,83 @@ inline void vge_load(s_vge *vge, char *file_path)
 
 //------------------------------------------------------------------------------
 
-inline void vge_render(s_vge *vge, char *file_path)
+inline void vge_render(s_vge *vge, char *proj_path)
 {
+	char *proj_name = proj_path + strlen(proj_path);
+	while (proj_name > proj_path && *(proj_name-1) != '\\' && *(proj_name-1) != '/')
+	{ --proj_name; }
+	
+	char name[64];
+	char *name_ = name;
+	while (*proj_name != '.') { *name_ = *proj_name; ++proj_name; ++name_; }
+	*name_ = '\0';
+	
+	char file_path[256];
+	strcpy(file_path, proj_path);
+	char *file_path_ = file_path + strlen(file_path);
+	while (*file_path_ != '.') { --file_path_; }
+	file_path_[1] = 'h';
+	file_path_[2] = '\0';
+	
 	FILE *file_handle = fopen(file_path, "w+");
 	
-	char *file_name = file_path + strlen(file_path);
-	while (file_name > file_path && *(file_name-1) != '\\' && *(file_name-1) != '/')
-	{ --file_name; }
+	fprintf(file_handle, "#ifndef __%s__ \n", name);
+	fprintf(file_handle, "#define __%s__ \n", name);
 	
-	fprintf(file_handle, "#ifndef __%s__", file_name);
-	fprintf(file_handle, "#define __%s__", file_name);
+	fprintf(file_handle, "typedef struct %s { \n", name);
+	fprintf(file_handle, "} s_%s; \n", name);
 	
-	fprintf(file_handle, "typedef struct %s {", file_name);
-	fprintf(file_handle, "} s_%s;", file_name);
+	fprintf(file_handle, "inline void %s_draw(s_%s *%s) { \n", name, name, name);
+	fprintf(file_handle, "ImGuiWindow* window = ImGui::GetCurrentWindow(); \n");
+	fprintf(file_handle, "ImRect window_rect = window->InnerRect; \n");
+	fprintf(file_handle, "ImVec2 window_size = window_rect.Max - window_rect.Min; \n");
+	fprintf(file_handle, "float  scale       = window_size.x / %f; \n", (vge->vl3d_view.window_rect.Max - vge->vl3d_view.window_rect.Min).x);
 	
-	fprintf(file_handle, "inline void %s_draw(s_%s %s) {", file_name, file_name, file_name);
-	fprintf(file_handle, "ImGuiWindow* window = ImGui::GetCurrentWindow();");
+	for (int i = 0; i < vge->vl3d.obj_of; ++i)
+	{
+		s_vl3d_obj *obj = &vge->vl3d.obj_ls[i];
+		
+		if ((obj->flags & vl3d_obj_flags_ignore)
+		|| (obj->flags & vl3d_obj_flags_spec))
+		{
+			continue;
+		}
+		
+		if (obj->type == vl3d_obj_type_line)
+		{
+			ImVec2 p0 = vl3d_view_tf(&vge->vl3d_view, obj->line.p0) - vge->vl3d_view.window_rect.Min;
+			ImVec2 p1 = vl3d_view_tf(&vge->vl3d_view, obj->line.p1) - vge->vl3d_view.window_rect.Min;
+			
+			fprintf(file_handle, "window->DrawList->AddLine(window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, %d); \n",
+					p0.x, p0.y, p1.x, p1.y, obj->color);
+		}
+		
+		if (obj->type == vl3d_obj_type_text)
+		{
+			ImVec2 p0 = vl3d_view_tf(&vge->vl3d_view, obj->text.p0) - vge->vl3d_view.window_rect.Min;
+			
+			fprintf(file_handle, "window->DrawList->AddText(window_rect.Min+ImVec2(%f,%f)*scale, %d, \"%s\"); \n",
+					p0.x, p0.y, obj->color, obj->text.data);
+		}
+		
+		if (obj->type == vl3d_obj_type_rect)
+		{
+			ImVec2 p0 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p0) - vge->vl3d_view.window_rect.Min;
+			ImVec2 p1 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p1) - vge->vl3d_view.window_rect.Min;
+			ImVec2 p2 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p2) - vge->vl3d_view.window_rect.Min;
+			ImVec2 p3 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p3) - vge->vl3d_view.window_rect.Min;
+			
+			fprintf(file_handle, "window->DrawList->AddTriangleFilled(window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, %d); \n",
+					p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, obj->color);
+			
+			fprintf(file_handle, "window->DrawList->AddTriangleFilled(window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, %d); \n",
+					p2.x, p2.y, p3.x, p3.y, p0.x, p0.y, obj->color);
+		}
+	}
 	
-	fprintf(file_handle, "}");
+	fprintf(file_handle, "} \n");
 	
-	fprintf(file_handle, "#endif");
+	fprintf(file_handle, "#endif \n");
 	
 	fclose(file_handle);
 	

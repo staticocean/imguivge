@@ -18,6 +18,10 @@
 #include "gui_tbar.h"
 #include "gui_vge.h"
 
+#ifndef NDEBUG
+#include "ivge_bu0836x.h"
+#endif
+
 //------------------------------------------------------------------------------
 
 typedef struct gui
@@ -78,7 +82,7 @@ inline uint8_t gui_init(s_gui *gui, s_gui_init attr)
  
 	vge_init(&gui->vge, (s_vge_attr) {});
 	
-	sprintf(gui->gui_tbar.file_path, "./default.ivge");
+	sprintf(gui->gui_tbar.file_path, "./ivge_image.ivge");
 	vge_load(gui->gui_tbar.vge, gui->gui_tbar.file_path);
 	
 	return 0x00;
@@ -91,11 +95,49 @@ inline uint8_t gui_main(s_gui *gui)
 	ImGuiIO& io = ImGui::GetIO();
 	
 	if (io.KeyCtrl && ImGui::IsKeyPressed('S', false))
+	{ vge_save(&gui->vge, gui->gui_tbar.file_path); }
+	
+	if (io.KeyCtrl && ImGui::IsKeyPressed('R', false))
+	{ vge_render(&gui->vge, gui->gui_tbar.file_path); }
+	
+	if (io.KeyCtrl && ImGui::IsKeyPressed('D', false))
+	{ gui->vge.sel_type = VGE_SEL_NONE; gui->vge.sel_item = NULL; }
+	
+	if (ImGui::IsKeyPressed('[', false))
 	{
-		vge_save(&gui->vge, gui->gui_tbar.file_path);
+		if (gui->vge.sel_type == VGE_SEL_OBJ && gui->vge.sel_item != NULL)
+		{
+			uint16_t obj_index = vl3d_obj_index(&gui->vge.vl3d, (s_vl3d_obj*) gui->vge.sel_item);
+			
+			if (obj_index > vl3d_range_get_high(gui->vge.vl3d_xyz.range)
+				&& obj_index > vl3d_range_get_high(gui->vge.vl3d_gridline.range))
+			{
+				std::swap(gui->vge.vl3d.obj_ls[obj_index], gui->vge.vl3d.obj_ls[obj_index-1]);
+				gui->vge.sel_item = &gui->vge.vl3d.obj_ls[obj_index-1];
+			}
+		}
 	}
 	
-    const int pwidth = 300;
+	if (ImGui::IsKeyPressed(']', false))
+	{
+		if (gui->vge.sel_type == VGE_SEL_OBJ && gui->vge.sel_item != NULL)
+		{
+			uint16_t obj_index = vl3d_obj_index(&gui->vge.vl3d, (s_vl3d_obj*) gui->vge.sel_item);
+			
+			if (obj_index > vl3d_range_get_high(gui->vge.vl3d_xyz.range)
+				&& obj_index > vl3d_range_get_high(gui->vge.vl3d_gridline.range))
+			{
+				std::swap(gui->vge.vl3d.obj_ls[obj_index], gui->vge.vl3d.obj_ls[obj_index+1]);
+				gui->vge.sel_item = &gui->vge.vl3d.obj_ls[obj_index+1];
+			}
+		}
+	}
+	
+//	if (gui->vge.sel_type == VGE_SEL_OBJ && gui->vge.sel_item != NULL
+//	&& ImGui::)
+//	{ vge_render(&gui->vge, gui->gui_tbar.file_path); }
+	
+    const int pwidth = 250;
     
 //	static s_dev *sel = NULL;
 	
@@ -154,10 +196,20 @@ inline uint8_t gui_main(s_gui *gui)
 		ImGui::End();
 	}
 
-	#ifdef NDEBUG
-	#else
+	#ifndef NDEBUG
+	
 		bool mw = true;
 		ImGui::ShowMetricsWindow(&mw);
+		
+		ImGui::Begin("render_preview");
+		ImGui::BeginChildFrame(ImGui::GetID("render_preview"), ImGui::GetContentRegionAvail());
+	
+		ivge_bu0836x image;
+		ivge_bu0836x_draw(&image);
+		
+		ImGui::EndChildFrame();
+		ImGui::End();
+		
 	#endif
 
 //	self->w_width = 700;

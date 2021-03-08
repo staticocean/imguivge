@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 add_compile_definitions(IMGUI_DEFINE_MATH_OPERATORS)
 
-include_directories(.)
+include_directories(./)
 include_directories(./src)
 
 file(GLOB src_main

@@ -19,10 +19,10 @@
 
 typedef struct gui_tbar
 {
-	int height;
+	int 	height;
 	
 	s_vge 	*vge;
-	char file_path[512];
+	char 	file_path[512];
 	
 } 	s_gui_tbar;
 
@@ -34,7 +34,7 @@ inline void gui_tbar_menu_file(s_gui_tbar *tbar)
 	{
 		nfdchar_t *user_path;
 		nfdfilteritem_t filterItem[1] = { { "IMGUI VGE Project", "ivge" } };
-		nfdresult_t result = NFD_OpenDialog(&user_path, filterItem, 1, tbar->file_path);
+		nfdresult_t result = NFD_OpenDialog(&user_path, filterItem, 1, NULL);
 		
 		if (result == NFD_OKAY)
 		{
@@ -52,7 +52,7 @@ inline void gui_tbar_menu_file(s_gui_tbar *tbar)
 	{
 		nfdchar_t *user_path;
 		nfdfilteritem_t filterItem[1] = { { "IMGUI VGE Project", "ivge" } };
-		nfdresult_t result = NFD_SaveDialog(&user_path, filterItem, 1, tbar->file_path, "vge_image.ivge");
+		nfdresult_t result = NFD_SaveDialog(&user_path, filterItem, 1, NULL, "vge_image.ivge");
 		
 		if (result == NFD_OKAY)
 		{
