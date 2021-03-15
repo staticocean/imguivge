@@ -19,7 +19,7 @@
 #include "gui_vge.h"
 
 #ifndef NDEBUG
-#include "ivge_bu0836x.h"
+//#include "ivge_bu0836x.h"
 #endif
 
 //------------------------------------------------------------------------------
@@ -201,14 +201,14 @@ inline uint8_t gui_main(s_gui *gui)
 		bool mw = true;
 		ImGui::ShowMetricsWindow(&mw);
 		
-		ImGui::Begin("render_preview");
-		ImGui::BeginChildFrame(ImGui::GetID("render_preview"), ImGui::GetContentRegionAvail());
-	
-		ivge_bu0836x image;
-		ivge_bu0836x_draw(&image);
-		
-		ImGui::EndChildFrame();
-		ImGui::End();
+//		ImGui::Begin("render_preview");
+//		ImGui::BeginChildFrame(ImGui::GetID("render_preview"), ImGui::GetContentRegionAvail());
+//
+//		ivge_bu0836x image;
+//		ivge_bu0836x_draw(&image);
+//
+//		ImGui::EndChildFrame();
+//		ImGui::End();
 		
 	#endif
 

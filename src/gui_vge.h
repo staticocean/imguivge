@@ -498,7 +498,7 @@ inline void gui_vge_objlist(s_vge *vge)
 inline void gui_vge_canvas(s_vge *vge)
 {
 	vl3d_begin(&vge->vl3d);
-	vl3d_tbar_show(&vge->vl3d, &vge->vl3d_tbar, &vge->vl3d_view);
+	vl3d_tbar_draw(&vge->vl3d, &vge->vl3d_tbar, &vge->vl3d_view);
 	vl3d_view_ctrl2d(&vge->vl3d, &vge->vl3d_view);
 	
 	if (ImGui::BeginPopupContextItem("new_obj_menu"))
@@ -539,7 +539,7 @@ inline void gui_vge_canvas(s_vge *vge)
 		vl3d_gridfline2d(&vge->vl3d, &vge->vl3d_gridline);
 	}
 	
-	vl3d_view_show(&vge->vl3d, &vge->vl3d_view);
+	vl3d_view_draw(&vge->vl3d, &vge->vl3d_view);
 	
 	// Interactive overflay
 	{
