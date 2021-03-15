@@ -155,6 +155,14 @@ inline void gui_vge_obj(s_vge *vge, s_vl3d_obj *obj)
 	
 	if (ImGui::BeginPopupContextItem("var_menu"))
 	{
+		if (obj->type == vl3d_obj_type_rect)
+		{
+			if (ImGui::Selectable("set as frame"))
+			{
+				vge->frame = obj->rect;
+			}
+		}
+		
 		if (ImGui::Selectable("delete"))
 		{
 //			if (gui->sel_item == &obj->data_list[j])
@@ -504,10 +512,10 @@ inline void gui_vge_canvas(s_vge *vge)
 		const s_vl3d_rect  default_rect  = { .flags = vl3d_obj_flags_none, .color = vl3d_col_legacy, .p0 = {0,0,0}, .p1 = {1,0,0}, .p2 = {1,0,1}, .p3 = {0,0,1} };
 		const s_vl3d_text  default_text  = { .flags = vl3d_obj_flags_none, .color = vl3d_col_l 	 , .p0 = {0,0,0}, .data = "text" };
 		
-		if (ImGui::Selectable("LINE    ")) { vl3d_add_lineat (&vge->vl3d, default_line , posat); }
-		if (ImGui::Selectable("TRIANGLE")) { vl3d_add_trnglat(&vge->vl3d, default_trngl, posat); }
-		if (ImGui::Selectable("TEXT    ")) { vl3d_add_textat (&vge->vl3d, default_text , posat); }
-		if (ImGui::Selectable("RECT    ")) { vl3d_add_rectat (&vge->vl3d, default_rect , posat); }
+		if (ImGui::Selectable("LINE    ")) { vl3d_add_lineat (&vge->vl3d, default_line , posat); vge->sel_type = VGE_SEL_OBJ; vge->sel_item = &vge->vl3d.obj_ls[vge->vl3d.obj_of-1]; }
+		if (ImGui::Selectable("TRIANGLE")) { vl3d_add_trnglat(&vge->vl3d, default_trngl, posat); vge->sel_type = VGE_SEL_OBJ; vge->sel_item = &vge->vl3d.obj_ls[vge->vl3d.obj_of-1]; }
+		if (ImGui::Selectable("TEXT    ")) { vl3d_add_textat (&vge->vl3d, default_text , posat); vge->sel_type = VGE_SEL_OBJ; vge->sel_item = &vge->vl3d.obj_ls[vge->vl3d.obj_of-1]; }
+		if (ImGui::Selectable("RECT    ")) { vl3d_add_rectat (&vge->vl3d, default_rect , posat); vge->sel_type = VGE_SEL_OBJ; vge->sel_item = &vge->vl3d.obj_ls[vge->vl3d.obj_of-1]; }
 	
 		ImGui::EndPopup();
 	}

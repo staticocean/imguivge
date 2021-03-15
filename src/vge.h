@@ -87,6 +87,8 @@ typedef struct vge
     void 				*sel_item;
     uint8_t 			sel_type;
     
+    s_vl3d_rect			frame;
+    
 }   s_vge;
 
 typedef struct vge_attr
@@ -188,6 +190,17 @@ inline void vge_render(s_vge *vge, char *proj_path)
 	file_path_[1] = 'h';
 	file_path_[2] = '\0';
 	
+	vlf_t bound_min[3];
+	vlf_t bound_max[3];
+	
+	vl3d_rect_min(&vge->frame, bound_min);
+	vl3d_rect_max(&vge->frame, bound_max);
+	
+	ImVec2 bound_min_ = vl3d_view_tf(&vge->vl3d_view, bound_min);
+	ImVec2 bound_max_ = vl3d_view_tf(&vge->vl3d_view, bound_max);
+	
+	std::swap(bound_min_.y, bound_max_.y);
+	
 	FILE *file_handle = fopen(file_path, "w+");
 	
 	fprintf(file_handle, "#ifndef __%s__ \n", name);
@@ -200,7 +213,7 @@ inline void vge_render(s_vge *vge, char *proj_path)
 	fprintf(file_handle, "ImGuiWindow* window = ImGui::GetCurrentWindow(); \n");
 	fprintf(file_handle, "ImRect window_rect = window->InnerRect; \n");
 	fprintf(file_handle, "ImVec2 window_size = window_rect.Max - window_rect.Min; \n");
-	fprintf(file_handle, "float  scale       = window_size.x / %f; \n", (vge->vl3d_view.window_rect.Max - vge->vl3d_view.window_rect.Min).x);
+	fprintf(file_handle, "float  scale       = window_size.x / %f; \n", (bound_max_ - bound_min_).x);
 	
 	for (int i = 0; i < vge->vl3d.obj_of; ++i)
 	{
@@ -214,32 +227,32 @@ inline void vge_render(s_vge *vge, char *proj_path)
 		
 		if (obj->type == vl3d_obj_type_line)
 		{
-			ImVec2 p0 = vl3d_view_tf(&vge->vl3d_view, obj->line.p0) - vge->vl3d_view.window_rect.Min;
-			ImVec2 p1 = vl3d_view_tf(&vge->vl3d_view, obj->line.p1) - vge->vl3d_view.window_rect.Min;
+			ImVec2 p0 = vl3d_view_tf(&vge->vl3d_view, obj->line.p0) - bound_min_;
+			ImVec2 p1 = vl3d_view_tf(&vge->vl3d_view, obj->line.p1) - bound_min_;
 			
-			fprintf(file_handle, "window->DrawList->AddLine(window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, %d); \n",
+			fprintf(file_handle, "window->DrawList->AddLine(window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, %u); \n",
 					p0.x, p0.y, p1.x, p1.y, obj->color);
 		}
 		
 		if (obj->type == vl3d_obj_type_text)
 		{
-			ImVec2 p0 = vl3d_view_tf(&vge->vl3d_view, obj->text.p0) - vge->vl3d_view.window_rect.Min;
+			ImVec2 p0 = vl3d_view_tf(&vge->vl3d_view, obj->text.p0) - bound_min_;
 			
-			fprintf(file_handle, "window->DrawList->AddText(window_rect.Min+ImVec2(%f,%f)*scale, %d, \"%s\"); \n",
+			fprintf(file_handle, "window->DrawList->AddText(window_rect.Min+ImVec2(%f,%f)*scale, %u, \"%s\"); \n",
 					p0.x, p0.y, obj->color, obj->text.data);
 		}
 		
 		if (obj->type == vl3d_obj_type_rect)
 		{
-			ImVec2 p0 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p0) - vge->vl3d_view.window_rect.Min;
-			ImVec2 p1 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p1) - vge->vl3d_view.window_rect.Min;
-			ImVec2 p2 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p2) - vge->vl3d_view.window_rect.Min;
-			ImVec2 p3 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p3) - vge->vl3d_view.window_rect.Min;
+			ImVec2 p0 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p0) - bound_min_;
+			ImVec2 p1 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p1) - bound_min_;
+			ImVec2 p2 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p2) - bound_min_;
+			ImVec2 p3 = vl3d_view_tf(&vge->vl3d_view, obj->rect.p3) - bound_min_;
 			
-			fprintf(file_handle, "window->DrawList->AddTriangleFilled(window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, %d); \n",
+			fprintf(file_handle, "window->DrawList->AddTriangleFilled(window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, %u); \n",
 					p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, obj->color);
 			
-			fprintf(file_handle, "window->DrawList->AddTriangleFilled(window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, %d); \n",
+			fprintf(file_handle, "window->DrawList->AddTriangleFilled(window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, window_rect.Min+ImVec2(%f,%f)*scale, %u); \n",
 					p2.x, p2.y, p3.x, p3.y, p0.x, p0.y, obj->color);
 		}
 	}
